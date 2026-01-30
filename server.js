@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -42,6 +45,43 @@ app.post('/api/users', (req, res) => {
     email
   };
   res.status(201).json(newUser);
+});
+
+// VULNERABILIDAD 1: Command Injection - ejecuta comandos sin sanitizar
+app.get('/api/ping', (req, res) => {
+  const host = req.query.host;
+  // Sin validación del input del usuario
+  exec(`ping -n 4 ${host}`, (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ output: stdout });
+  });
+});
+
+// VULNERABILIDAD 2: Path Traversal - acceso a archivos sin validación
+app.get('/api/file', (req, res) => {
+  const filename = req.query.name;
+  // Sin sanitizar el path, permite acceder a cualquier archivo
+  const filePath = path.join(__dirname, 'data', filename);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(404).json({ error: 'Archivo no encontrado' });
+    }
+    res.json({ content: data });
+  });
+});
+
+// VULNERABILIDAD 3: Code Injection con eval() - ejecuta código arbitrario
+app.post('/api/calculate', (req, res) => {
+  const { expression } = req.body;
+  try {
+    // eval() es extremadamente peligroso con input del usuario
+    const result = eval(expression);
+    res.json({ result });
+  } catch (error) {
+    res.status(400).json({ error: 'Expresión inválida' });
+  }
 });
 
 // Manejo de errores 404
