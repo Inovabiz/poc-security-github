@@ -1,0 +1,49 @@
+name: "CodeQL"
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '0 2 * * 1'    # Lunes 2am UTC
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }} for security and quality
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'python', 'typescript', 'cpp', 'csharp', 'go', 'java']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  reviewers:
+    name: "Auto-request reviewers on PRs to master"
+    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request reviewers
+        uses: ahmadnassri/action-request-review@v2
+        with:
+          reviewers: Matias-Inovabiz
