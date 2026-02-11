@@ -45,6 +45,31 @@ app.post('/api/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
+// ================================================================================
+// ⚠️ CÓDIGO CON PROBLEMAS INTENCIONALES PARA GITHUB ADVANCED SECURITY (CodeQL) ⚠️
+// ================================================================================
+// Este código contiene 3 vulnerabilidades intencionales que serán detectadas
+// por CodeQL durante el análisis del Pull Request.
+// ADVERTENCIA: Este código es solo para demostración - NO usar en producción.
+// ================================================================================
+
+// --------------------------------------------------------------------------------
+// PROBLEMA #1: SQL Injection (CWE-89)
+// --------------------------------------------------------------------------------
+// ¿Qué detectará CodeQL?
+// - Concatenación directa de input del usuario en una consulta SQL
+// - Riesgo: Un atacante puede inyectar código SQL malicioso
+// Severidad esperada: CRITICAL/HIGH
+// Ejemplo de ataque: ?q=' OR '1'='1
+app.get('/api/search', (req, res) => {
+  const searchTerm = req.query.q;
+  // ⚠️ VULNERABILIDAD: Sin sanitización ni prepared statements
+  const query = "SELECT * FROM users WHERE name = '" + searchTerm + "'";
+  res.json({ query, warning: 'SQL Injection vulnerability' });
+});
+
+
+
 // Manejo de errores 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
