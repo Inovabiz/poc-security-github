@@ -44,66 +44,67 @@ app.post('/api/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
-// ⚠️ CÓDIGO CON PROBLEMAS INTENCIONALES PARA CODEQL ⚠️
+// ================================================================================
+// ⚠️ CÓDIGO CON PROBLEMAS INTENCIONALES PARA GITHUB ADVANCED SECURITY (CodeQL) ⚠️
+// ================================================================================
+// Este código contiene 3 vulnerabilidades intencionales que serán detectadas
+// por CodeQL durante el análisis del Pull Request.
+// ADVERTENCIA: Este código es solo para demostración - NO usar en producción.
+// ================================================================================
 
-// Problema 1: SQL Injection vulnerability
+// --------------------------------------------------------------------------------
+// PROBLEMA #1: SQL Injection (CWE-89)
+// --------------------------------------------------------------------------------
+// ¿Qué detectará CodeQL?
+// - Concatenación directa de input del usuario en una consulta SQL
+// - Riesgo: Un atacante puede inyectar código SQL malicioso
+// Severidad esperada: CRITICAL/HIGH
+// Ejemplo de ataque: ?q=' OR '1'='1
 app.get('/api/search', (req, res) => {
   const searchTerm = req.query.q;
-  // CodeQL detectará: concatenación directa de input del usuario en SQL
+  // ⚠️ VULNERABILIDAD: Sin sanitización ni prepared statements
   const query = "SELECT * FROM users WHERE name = '" + searchTerm + "'";
   res.json({ query, warning: 'SQL Injection vulnerability' });
 });
 
-// Problema 2: Path Traversal vulnerability
-const fs = require('fs');
-app.get('/api/file', (req, res) => {
-  const filename = req.query.name;
-  // CodeQL detectará: acceso a archivos sin validación
-  const filePath = './uploads/' + filename;
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) return res.status(404).json({ error: 'File not found' });
-    res.send(data);
-  });
-});
-
-// Problema 3: Command Injection vulnerability
+// --------------------------------------------------------------------------------
+// PROBLEMA #2: Command Injection (CWE-78)
+// --------------------------------------------------------------------------------
+// ¿Qué detectará CodeQL?
+// - Ejecución de comandos del sistema con input no sanitizado
+// - Riesgo: Un atacante puede ejecutar comandos arbitrarios en el servidor
+// Severidad esperada: CRITICAL/HIGH
+// Ejemplo de ataque: ?host=8.8.8.8; rm -rf /
 const { exec } = require('child_process');
 app.get('/api/ping', (req, res) => {
   const host = req.query.host;
-  // CodeQL detectará: ejecución de comandos con input no sanitizado
+  // ⚠️ VULNERABILIDAD: Concatenación directa de input en comando shell
   exec('ping ' + host, (error, stdout) => {
     res.json({ result: stdout });
   });
 });
 
-// Problema 4: Credenciales hardcodeadas
-const API_KEY = 'sk-1234567890abcdef';  // CodeQL detectará esto
-const DB_PASSWORD = 'admin123';          // CodeQL detectará esto
-
-// Problema 5: Comparación insegura de contraseñas
-app.post('/api/login', (req, res) => {
-  const { password } = req.body;
-  // CodeQL detectará: comparación de contraseña sin hash
-  if (password == DB_PASSWORD) {
-    res.json({ token: API_KEY });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials' });
+// --------------------------------------------------------------------------------
+// PROBLEMA #3: Server-Side Request Forgery - SSRF (CWE-918)
+// --------------------------------------------------------------------------------
+// ¿Qué detectará CodeQL?
+// - Peticiones HTTP a URLs proporcionadas por el usuario sin validación
+// - Riesgo: Un atacante puede hacer que el servidor acceda a recursos internos
+//   o externos arbitrarios (APIs internas, cloud metadata, escaneo de puertos)
+// Severidad esperada: HIGH/MEDIUM
+// Ejemplo de ataque: ?url=http://169.254.169.254/latest/meta-data/
+//                    ?url=http://localhost:8080/admin
+app.get('/api/fetch-data', async (req, res) => {
+  const targetUrl = req.query.url;
+  try {
+    // ⚠️ VULNERABILIDAD: Permite peticiones HTTP a URLs arbitrarias
+    // El servidor puede ser usado como proxy para atacar recursos internos
+    const response = await fetch(targetUrl);
+    const data = await response.text();
+    res.json({ data, source: targetUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-});
-
-// Problema 6: eval() con input del usuario
-app.post('/api/calculate', (req, res) => {
-  const expression = req.body.expression;
-  // CodeQL detectará: uso peligroso de eval()
-  const result = eval(expression);
-  res.json({ result });
-});
-
-// Problema 7: Missing input validation
-app.post('/api/update-profile', (req, res) => {
-  const userData = req.body;
-  // CodeQL detectará: falta de validación de input
-  res.json({ updated: true, data: userData });
 });
 
 // Manejo de errores 404
