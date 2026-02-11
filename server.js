@@ -25,7 +25,6 @@ app.get('/api/users', (req, res) => {
     { id: 2, name: 'Usuario 2', email: 'user2@example.com' },
     { id: 3, name: 'Usuario 3', email: 'user3@example.com' }
   ];
-  console.log(users);
   res.json(users);
 });
 
@@ -48,27 +47,41 @@ app.post('/api/users', (req, res) => {
 // ================================================================================
 // ⚠️ CÓDIGO CON PROBLEMAS INTENCIONALES PARA GITHUB ADVANCED SECURITY (CodeQL) ⚠️
 // ================================================================================
-// Este código contiene 3 vulnerabilidades intencionales que serán detectadas
+// Este código contiene 1 vulnerabilidad intencional que será detectada
 // por CodeQL durante el análisis del Pull Request.
 // ADVERTENCIA: Este código es solo para demostración - NO usar en producción.
 // ================================================================================
 
 // --------------------------------------------------------------------------------
-// PROBLEMA #1: SQL Injection (CWE-89)
+// PROBLEMA #1: Prototype Pollution (CWE-1321)
 // --------------------------------------------------------------------------------
 // ¿Qué detectará CodeQL?
-// - Concatenación directa de input del usuario en una consulta SQL
-// - Riesgo: Un atacante puede inyectar código SQL malicioso
-// Severidad esperada: CRITICAL/HIGH
-// Ejemplo de ataque: ?q=' OR '1'='1
-app.get('/api/search', (req, res) => {
-  const searchTerm = req.query.q;
-  // ⚠️ VULNERABILIDAD: Sin sanitización ni prepared statements
-  const query = "SELECT * FROM users WHERE name = '" + searchTerm + "'";
-  res.json({ query, warning: 'SQL Injection vulnerability' });
+// - Modificación no controlada de propiedades de objetos usando input del usuario
+// - Riesgo: Un atacante puede contaminar el prototipo de Object y afectar toda la app
+// Severidad esperada: HIGH/MEDIUM
+// Ejemplo de ataque: {"__proto__": {"isAdmin": true}}
+//                    {"constructor": {"prototype": {"polluted": "yes"}}}
+app.post('/api/merge-config', (req, res) => {
+  const defaultConfig = { theme: 'light', language: 'es' };
+  const userConfig = req.body;
+
+  // ⚠️ VULNERABILIDAD: Merge recursivo sin protección contra __proto__
+  // Permite que el usuario inyecte propiedades en Object.prototype
+  function deepMerge(target, source) {
+    for (let key in source) {
+      if (source[key] && typeof source[key] === 'object') {
+        target[key] = target[key] || {};
+        deepMerge(target[key], source[key]);
+      } else {
+        target[key] = source[key];
+      }
+    }
+    return target;
+  }
+
+  const finalConfig = deepMerge(defaultConfig, userConfig);
+  res.json({ config: finalConfig, message: 'Configuration merged' });
 });
-
-
 
 // Manejo de errores 404
 app.use((req, res) => {
