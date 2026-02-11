@@ -1,0 +1,79 @@
+# ==============================================================================
+# Dependabot - Actualización Automática de Dependencias
+# ==============================================================================
+# Dependabot escanea las dependencias del proyecto y crea PRs automáticamente
+# para actualizarlas cuando detecta nuevas versiones o vulnerabilidades.
+# ==============================================================================
+
+# Versión del schema de configuración de Dependabot
+version: 2
+
+# Lista de ecosistemas a monitorear (npm, pip, maven, docker, etc.)
+updates:
+  # Configuración para el ecosistema npm (Node.js/JavaScript)
+  - package-ecosystem: "npm"
+    
+    # Directorio donde se encuentra package.json (raíz del proyecto)
+    directory: "/"
+    
+    # ========================================
+    # PROGRAMACIÓN: Cuándo ejecutar Dependabot
+    # ========================================
+    schedule:
+      interval: "weekly"       # Frecuencia: daily, weekly, monthly
+      day: "wednesday"         # Día de la semana (solo para weekly)
+      time: "16:07"           # Hora en UTC (15:42 UTC)
+    
+    # Límite de PRs abiertos simultáneamente (evita spam de PRs)
+    open-pull-requests-limit: 5
+    
+    # ========================================
+    # ASIGNACIONES Y NOTIFICACIONES
+    # ========================================
+    # Usuario(s) asignado(s) automáticamente al PR
+    assignees:
+      - "Matias-Inovabiz"
+    
+    # Usuario(s) solicitado(s) como reviewers del PR
+    reviewers:
+      - "Nflores95"
+    
+    # Etiquetas (labels) aplicadas automáticamente al PR
+    labels:
+      - "dependencies"
+    
+    # Rama destino donde se crearán los PRs (default: rama principal del repo)
+    target-branch: "master"
+    
+    # ========================================
+    # REGLAS DE ACTUALIZACIÓN
+    # ========================================
+    # Dependencias a ignorar (no crear PRs para estas)
+    ignore:
+      - dependency-name: "express"
+        versions: [">=5.0.0"]  # Ignorar Express v5+ (breaking changes)
+    
+    # Tipos de dependencias permitidas para actualización
+    allow:
+      - dependency-type: "direct"  # Solo dependencias directas (no transitive)
+        # Opciones: "direct", "indirect", "all", "production", "development"
+    
+    # ========================================
+    # CONFIGURACIÓN DE COMMITS
+    # ========================================
+    # Formato de mensaje de commit para los PRs
+    commit-message:
+      prefix: "deps"  # Prefijo: "deps: Bump express from 4.17.1 to 4.18.0"
+    
+    # Estrategia de versionado cuando se actualiza package.json
+    versioning-strategy: "increase"
+    # Opciones:
+    #   - "increase": Actualiza a la versión más alta permitida por el rango
+    #   - "widen": Amplía el rango de versiones
+    #   - "increase-if-necessary": Solo actualiza si es necesario
+    
+    # Estrategia de rebase cuando hay conflictos
+    rebase-strategy: "auto"
+    # Opciones:
+    #   - "auto": Dependabot decide automáticamente
+    #   - "disabled": Nunca hacer rebase automático
