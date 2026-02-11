@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
   schedule:
     - cron: '0 2 * * 1'    # Lunes 2am UTC
 
@@ -39,8 +39,8 @@ jobs:
           category: "/language:${{ matrix.language }}"
 
   reviewers:
-    name: "Auto-request reviewers on PRs to master"
-    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+    name: "Auto-request reviewers on PRs to master/main"
+    if: github.event_name == 'pull_request' && (github.base_ref == 'master' || github.base_ref == 'main')
     runs-on: ubuntu-latest
     steps:
       - name: Request reviewers
