@@ -53,4 +53,4 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
-          gh pr edit $PR_NUMBER --repo $REPO --add-reviewer Matias-Inovabiz
+          gh pr edit $PR_NUMBER --repo $REPO --add-reviewer Nflores95
