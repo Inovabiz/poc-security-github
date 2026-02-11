@@ -22,7 +22,7 @@ updates:
     schedule:
       interval: "weekly"       # Frecuencia: daily, weekly, monthly
       day: "wednesday"         # Día de la semana (solo para weekly)
-      time: "15:58"           # Hora en UTC (15:42 UTC)
+      time: "16:07"           # Hora en UTC (15:42 UTC)
     
     # Límite de PRs abiertos simultáneamente (evita spam de PRs)
     open-pull-requests-limit: 5

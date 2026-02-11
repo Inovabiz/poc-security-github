@@ -44,45 +44,6 @@ app.post('/api/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
-// ================================================================================
-// ⚠️ CÓDIGO CON PROBLEMAS INTENCIONALES PARA GITHUB ADVANCED SECURITY (CodeQL) ⚠️
-// ================================================================================
-// Este código contiene 1 vulnerabilidad intencional que será detectada
-// por CodeQL durante el análisis del Pull Request.
-// ADVERTENCIA: Este código es solo para demostración - NO usar en producción.
-// ================================================================================
-
-// --------------------------------------------------------------------------------
-// PROBLEMA #1: Prototype Pollution (CWE-1321)
-// --------------------------------------------------------------------------------
-// ¿Qué detectará CodeQL?
-// - Modificación no controlada de propiedades de objetos usando input del usuario
-// - Riesgo: Un atacante puede contaminar el prototipo de Object y afectar toda la app
-// Severidad esperada: HIGH/MEDIUM
-// Ejemplo de ataque: {"__proto__": {"isAdmin": true}}
-//                    {"constructor": {"prototype": {"polluted": "yes"}}}
-app.post('/api/merge-config', (req, res) => {
-  const defaultConfig = { theme: 'light', language: 'es' };
-  const userConfig = req.body;
-
-  // ⚠️ VULNERABILIDAD: Merge recursivo sin protección contra __proto__
-  // Permite que el usuario inyecte propiedades en Object.prototype
-  function deepMerge(target, source) {
-    for (let key in source) {
-      if (source[key] && typeof source[key] === 'object') {
-        target[key] = target[key] || {};
-        deepMerge(target[key], source[key]);
-      } else {
-        target[key] = source[key];
-      }
-    }
-    return target;
-  }
-
-  const finalConfig = deepMerge(defaultConfig, userConfig);
-  res.json({ config: finalConfig, message: 'Configuration merged' });
-});
-
 // Manejo de errores 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
