@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: "weekly"  # Frecuencia de revisión
       day: "tuesday"      # Día de ejecución
-      time: "09:57"       # Hora en UTC
+      time: "10:34"       # Hora en UTC
     # Máximo de PRs abiertos simultáneamente
     open-pull-requests-limit: 5
     # Usuarios asignados automáticamente a los PRs
@@ -19,7 +19,7 @@ updates:
       - "Matias-Inovabiz"
     # Usuarios solicitados como revisores
     reviewers:
-      - "Nflores95"
+      - "Nflores95" 
     # Etiquetas aplicadas a los PRs
     labels:
       - "dependencies"
