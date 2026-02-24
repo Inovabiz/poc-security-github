@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: "weekly"  # Frecuencia de revisión
       day: "tuesday"      # Día de ejecución
-      time: "09:51"       # Hora en UTC
+      time: "09:57"       # Hora en UTC
     # Máximo de PRs abiertos simultáneamente
     open-pull-requests-limit: 5
     # Usuarios asignados automáticamente a los PRs
