@@ -26,6 +26,7 @@ app.get('/api/users', (req, res) => {
     { id: 3, name: 'Usuario 3', email: 'user3@example.com' }
   ];
   res.json(users);
+  console.log('Users:', users);
 });
 
 app.get('/api/users/:id', (req, res) => {
