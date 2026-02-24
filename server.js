@@ -1,14 +1,36 @@
 const express = require('express');
 const cors = require('cors');
+const sqlite3 = require('sqlite3');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const db = new sqlite3.Database(':memory:');
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// VULNERABLE 1: SQL Injection (CWE-089)
+// Input del usuario concatenado directamente en la query SQL
+app.get('/api/search', (req, res) => {
+  const name = req.query.name;
+  const query = "SELECT * FROM users WHERE name = '" + name + "'";
+  db.all(query, (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+// VULNERABLE 2: Reflected XSS (CWE-079)
+// Input del usuario insertado directamente en HTML sin sanitizar
+app.get('/api/greet', (req, res) => {
+  const name = req.query.name;
+  res.send("<h1>Hola, " + name + "!</h1>");
+});
 
 // Ruta de prueba
 app.get('/', (req, res) => {
